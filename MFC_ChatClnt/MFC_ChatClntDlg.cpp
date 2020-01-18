@@ -105,6 +105,8 @@ BOOL CMFCChatClntDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// Set small icon
 
 	// TODO: Add extra initialization here
+	GetDlgItem(IDC_IPADDRESS)->SetWindowTextW(_T("127.0.0.1"));
+	GetDlgItem(IDC_EDIT_PORT)->SetWindowTextW(_T("9091"));
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
@@ -160,9 +162,35 @@ HCURSOR CMFCChatClntDlg::OnQueryDragIcon()
 
 
 
+void CMFCChatClntDlg::writeInList(const CString& _msg) {
+	time = CTime::GetCurrentTime();
+	CString msg = time.Format("%X ");
+	msg += _msg;
+
+	CListBox* list = (CListBox*)GetDlgItem(IDC_LIST_HISTORY);
+	list->AddString(msg);
+
+	UpdateData(FALSE);
+}
+
+void CMFCChatClntDlg::clearSendEdit() {
+	GetDlgItem(IDC_EDIT_SEND)->SetWindowTextW(_T(""));
+}
+
 void CMFCChatClntDlg::OnBnClickedButtonSend() {
 	// TODO: Add your control notification handler code here
-	
+	if (conn) {
+		CString msg;
+		GetDlgItemText(IDC_EDIT_SEND, msg);
+		if (msg.GetLength()) {
+			TRACE("发送消息\n");
+			CT2A ascii(msg);
+			writeInList(CString("我：") + msg);
+
+			conn->Send(ascii.m_psz, msg.GetLength() * sizeof(TCHAR));
+			clearSendEdit();
+		}
+	}
 }
 
 
@@ -176,10 +204,19 @@ void CMFCChatClntDlg::OnBnClickedButtonConnect() {
 	GetDlgItem(IDC_IPADDRESS)->GetWindowTextW(ipAddr);
 	GetDlgItem(IDC_EDIT_PORT)->GetWindowTextW(port);
 
-	conn->Connect((LPCTSTR)ipAddr, _ttoi(port));
+	if (conn->Connect((LPCTSTR)ipAddr, _ttoi(port)) != SOCKET_ERROR) {
+		GetDlgItem(IDC_STATIC_STATUS)->SetWindowTextW(_T("已连接"));
+		writeInList(_T("连接服务器成功！"));
+		
+		//UpdateData(FALSE);
+	}
+
+	
 }
 
 
 void CMFCChatClntDlg::OnBnClickedButtonDisconnect() {
 	conn->Close();
+	conn = NULL;
+	GetDlgItem(IDC_STATIC_STATUS)->SetWindowTextW(_T("未连接"));
 }

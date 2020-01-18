@@ -24,7 +24,7 @@ public:
 // Implementation
 protected:
 	HICON m_hIcon;
-	ClntSocket* conn;
+	CTime time;
 
 	// Generated message map functions
 	virtual BOOL OnInitDialog();
@@ -32,6 +32,13 @@ protected:
 	afx_msg void OnPaint();
 	afx_msg HCURSOR OnQueryDragIcon();
 	DECLARE_MESSAGE_MAP()
+
+public:
+	ClntSocket* conn;
+
+	void writeInList(const CString& msg);
+	void clearSendEdit();
+
 public:
 	afx_msg void OnBnClickedButtonSend();
 	afx_msg void OnBnClickedButtonConnect();
