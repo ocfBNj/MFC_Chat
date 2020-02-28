@@ -43,4 +43,6 @@ public:
 	afx_msg void OnBnClickedButtonSend();
 	afx_msg void OnBnClickedButtonConnect();
 	afx_msg void OnBnClickedButtonDisconnect();
+	afx_msg void OnBnClickedButtonChangeName();
+	virtual void OnOK();
 };

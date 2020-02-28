@@ -16,17 +16,16 @@
 
 // CAboutDlg dialog used for App About
 
-class CAboutDlg : public CDialogEx
-{
+class CAboutDlg : public CDialogEx {
 public:
 	CAboutDlg();
 
-// Dialog Data
+	// Dialog Data
 #ifdef AFX_DESIGN_TIME
 	enum { IDD = IDD_ABOUTBOX };
 #endif
 
-	protected:
+protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 
 // Implementation
@@ -34,13 +33,11 @@ protected:
 	DECLARE_MESSAGE_MAP()
 };
 
-CAboutDlg::CAboutDlg() : CDialogEx(IDD_ABOUTBOX)
-{
-	
+CAboutDlg::CAboutDlg() : CDialogEx(IDD_ABOUTBOX) {
+
 }
 
-void CAboutDlg::DoDataExchange(CDataExchange* pDX)
-{
+void CAboutDlg::DoDataExchange(CDataExchange* pDX) {
 	CDialogEx::DoDataExchange(pDX);
 }
 
@@ -53,13 +50,11 @@ END_MESSAGE_MAP()
 
 
 CMFCChatClntDlg::CMFCChatClntDlg(CWnd* pParent /*=nullptr*/)
-	: CDialogEx(IDD_MFC_CHATCLNT_DIALOG, pParent), conn(NULL)
-{
+	: CDialogEx(IDD_MFC_CHATCLNT_DIALOG, pParent), conn(NULL) {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
 
-void CMFCChatClntDlg::DoDataExchange(CDataExchange* pDX)
-{
+void CMFCChatClntDlg::DoDataExchange(CDataExchange* pDX) {
 	CDialogEx::DoDataExchange(pDX);
 }
 
@@ -70,13 +65,13 @@ BEGIN_MESSAGE_MAP(CMFCChatClntDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON_SEND, &CMFCChatClntDlg::OnBnClickedButtonSend)
 	ON_BN_CLICKED(IDC_BUTTON_CONNECT, &CMFCChatClntDlg::OnBnClickedButtonConnect)
 	ON_BN_CLICKED(IDC_BUTTON_DISCONNECT, &CMFCChatClntDlg::OnBnClickedButtonDisconnect)
+	ON_BN_CLICKED(IDC_BUTTON_CHANGE_NAME, &CMFCChatClntDlg::OnBnClickedButtonChangeName)
 END_MESSAGE_MAP()
 
 
 // CMFCChatClntDlg message handlers
 
-BOOL CMFCChatClntDlg::OnInitDialog()
-{
+BOOL CMFCChatClntDlg::OnInitDialog() {
 	CDialogEx::OnInitDialog();
 
 	// Add "About..." menu item to system menu.
@@ -86,14 +81,12 @@ BOOL CMFCChatClntDlg::OnInitDialog()
 	ASSERT(IDM_ABOUTBOX < 0xF000);
 
 	CMenu* pSysMenu = GetSystemMenu(FALSE);
-	if (pSysMenu != nullptr)
-	{
+	if (pSysMenu != nullptr) {
 		BOOL bNameValid;
 		CString strAboutMenu;
 		bNameValid = strAboutMenu.LoadString(IDS_ABOUTBOX);
 		ASSERT(bNameValid);
-		if (!strAboutMenu.IsEmpty())
-		{
+		if (!strAboutMenu.IsEmpty()) {
 			pSysMenu->AppendMenu(MF_SEPARATOR);
 			pSysMenu->AppendMenu(MF_STRING, IDM_ABOUTBOX, strAboutMenu);
 		}
@@ -107,19 +100,21 @@ BOOL CMFCChatClntDlg::OnInitDialog()
 	// TODO: Add extra initialization here
 	GetDlgItem(IDC_IPADDRESS)->SetWindowTextW(_T("127.0.0.1"));
 	GetDlgItem(IDC_EDIT_PORT)->SetWindowTextW(_T("9091"));
+	CFileFind finder;
+	if (finder.FindFile(_T(".\\clnt_config.ini"))) {
+		CString name;
+		GetPrivateProfileString(_T("Client"), _T("name"), _T("未命名"), name.GetBuffer(MAX_PATH), MAX_PATH, _T(".\\clnt_config.ini"));
+		SetDlgItemText(IDC_EDIT_NAME, name);
+	}
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
 
-void CMFCChatClntDlg::OnSysCommand(UINT nID, LPARAM lParam)
-{
-	if ((nID & 0xFFF0) == IDM_ABOUTBOX)
-	{
+void CMFCChatClntDlg::OnSysCommand(UINT nID, LPARAM lParam) {
+	if ((nID & 0xFFF0) == IDM_ABOUTBOX) {
 		CAboutDlg dlgAbout;
 		dlgAbout.DoModal();
-	}
-	else
-	{
+	} else {
 		CDialogEx::OnSysCommand(nID, lParam);
 	}
 }
@@ -128,10 +123,8 @@ void CMFCChatClntDlg::OnSysCommand(UINT nID, LPARAM lParam)
 //  to draw the icon.  For MFC applications using the document/view model,
 //  this is automatically done for you by the framework.
 
-void CMFCChatClntDlg::OnPaint()
-{
-	if (IsIconic())
-	{
+void CMFCChatClntDlg::OnPaint() {
+	if (IsIconic()) {
 		CPaintDC dc(this); // device context for painting
 
 		SendMessage(WM_ICONERASEBKGND, reinterpret_cast<WPARAM>(dc.GetSafeHdc()), 0);
@@ -146,17 +139,14 @@ void CMFCChatClntDlg::OnPaint()
 
 		// Draw the icon
 		dc.DrawIcon(x, y, m_hIcon);
-	}
-	else
-	{
+	} else {
 		CDialogEx::OnPaint();
 	}
 }
 
 // The system calls this function to obtain the cursor to display while the user drags
 //  the minimized window.
-HCURSOR CMFCChatClntDlg::OnQueryDragIcon()
-{
+HCURSOR CMFCChatClntDlg::OnQueryDragIcon() {
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
@@ -178,16 +168,17 @@ void CMFCChatClntDlg::clearSendEdit() {
 }
 
 void CMFCChatClntDlg::OnBnClickedButtonSend() {
-	// TODO: Add your control notification handler code here
 	if (conn) {
 		CString msg;
 		GetDlgItemText(IDC_EDIT_SEND, msg);
 		if (msg.GetLength()) {
-			TRACE("发送消息\n");
-			CT2A ascii(msg);
-			writeInList(CString("我：") + msg);
+			CString name;
+			GetDlgItemText(IDC_EDIT_NAME, name);
+			msg = name + _T(": ") + msg;
 
-			conn->Send(ascii.m_psz, msg.GetLength() * sizeof(TCHAR));
+			writeInList(msg);
+
+			conn->Send(CT2A(msg.GetString()), msg.GetLength() * sizeof(TCHAR));
 			clearSendEdit();
 		}
 	}
@@ -195,7 +186,6 @@ void CMFCChatClntDlg::OnBnClickedButtonSend() {
 
 
 void CMFCChatClntDlg::OnBnClickedButtonConnect() {
-	// TODO: Add your control notification handler code here
 	conn = new ClntSocket();
 	conn->Create();
 
@@ -204,19 +194,37 @@ void CMFCChatClntDlg::OnBnClickedButtonConnect() {
 	GetDlgItem(IDC_IPADDRESS)->GetWindowTextW(ipAddr);
 	GetDlgItem(IDC_EDIT_PORT)->GetWindowTextW(port);
 
-	if (conn->Connect((LPCTSTR)ipAddr, _ttoi(port)) != SOCKET_ERROR) {
+	conn->Connect((LPCTSTR)ipAddr, _ttoi(port));
+	if (conn->GetLastError() == WSAEWOULDBLOCK) {
 		GetDlgItem(IDC_STATIC_STATUS)->SetWindowTextW(_T("已连接"));
 		writeInList(_T("连接服务器成功！"));
-		
+
 		//UpdateData(FALSE);
 	}
 
-	
 }
 
 
 void CMFCChatClntDlg::OnBnClickedButtonDisconnect() {
-	conn->Close();
-	conn = NULL;
-	GetDlgItem(IDC_STATIC_STATUS)->SetWindowTextW(_T("未连接"));
+	if (conn) {
+		conn->Close();
+		conn = NULL;
+		GetDlgItem(IDC_STATIC_STATUS)->SetWindowTextW(_T("未连接"));
+	}
+}
+
+
+void CMFCChatClntDlg::OnBnClickedButtonChangeName() {
+	CString name;
+	this->GetDlgItemText(IDC_EDIT_NAME, name);
+	if (name.GetLength()) {
+		if (this->MessageBox(_T("确定修改吗？"), NULL, MB_OKCANCEL) == IDOK) {
+			WritePrivateProfileString(_T("Client"), _T("name"), name, _T(".\\clnt_config.ini"));
+		}
+	}
+}
+
+
+void CMFCChatClntDlg::OnOK() {
+	OnBnClickedButtonSend();
 }
